@@ -1,0 +1,16 @@
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\config\DataLoader.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\config\SecurityConfig.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\config\WebConfig.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\controller\AuthController.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\controller\PhotoController.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\controller\UserController.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\dto\UserDTO.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\EjeBackendApplication.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\model\Admin.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\model\TipoUsuario.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\model\User.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\repository\AdminRepository.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\repository\UserRepository.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\service\AdminService.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\service\JwtService.java
+E:\documentos\EJE BJM 2025\eje-backend\src\main\java\com\eje\backend\service\UserService.java
