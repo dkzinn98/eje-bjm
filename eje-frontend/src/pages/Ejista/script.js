@@ -21,7 +21,7 @@ export const EJISTA_DATA = {
     whatsapp: { pattern: /^\(\d{2}\)\s\d{4,5}-\d{4}$|^\d{10,11}$/ },
     instagram: { pattern: /^@?[a-zA-Z0-9._]{1,30}$/ },
     idade: { min: 14, max: 25 },
-    apresentacao: { minLength: 50, maxLength: 500 }
+    apresentacao: { minLength: 30, maxLength: 900 }
   },
 
   messages: {

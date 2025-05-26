@@ -19,6 +19,7 @@ import {
   ActionButton 
 } from './stylesAdmin';
 import AdminLogin from './AdminLogin';
+import { EditModal } from './EditModal';
 import { userService, handleApiError } from '../../services/api';
 
 const AdminDashboard = () => {
@@ -28,6 +29,8 @@ const AdminDashboard = () => {
   const [pessoas, setPessoas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [editingUser, setEditingUser] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Carregar dados quando autenticar
   useEffect(() => {
@@ -56,8 +59,23 @@ const AdminDashboard = () => {
   };
 
   const handleEdit = (pessoa) => {
-    console.log('Editar pessoa:', pessoa);
-    alert(`Funcionalidade de edição será implementada para: ${pessoa.nome}`);
+    setEditingUser(pessoa);
+    setShowEditModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setEditingUser(null);
+    setShowEditModal(false);
+  };
+
+  const handleUpdateUser = (updatedUser) => {
+    setPessoas(prevUsers => 
+      prevUsers.map(user => 
+        user.id === updatedUser.id ? updatedUser : user
+      )
+    );
+    // Recarregar para atualizar estatísticas se necessário
+    loadUsers();
   };
 
   const handleDelete = async (pessoaId) => {
@@ -120,7 +138,7 @@ const AdminDashboard = () => {
         }}>
           ⚠️ {error}
           {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-<button 
+          <button 
             onClick={loadUsers}
             style={{
               marginLeft: '10px',
@@ -218,31 +236,31 @@ const AdminDashboard = () => {
               <CardBody>
                 <div className="info-group">
                   {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-<label>E-mail:</label>
+                  <label>E-mail:</label>
                   <span>{pessoa.email}</span>
                 </div>
                 
                 <div className="info-group">
                   {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-<label>WhatsApp:</label>
+                  <label>WhatsApp:</label>
                   <span>{pessoa.whatsapp}</span>
                 </div>
                 
                 <div className="info-group">
                   {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-<label>Instagram:</label>
+                  <label>Instagram:</label>
                   <span>{pessoa.instagram}</span>
                 </div>
                 
                 <div className="info-group">
                   {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-<label>Idade:</label>
+                  <label>Idade:</label>
                   <span>{pessoa.idade} anos</span>
                 </div>
                 
                 <div className="info-group">
                   {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-<label>Motivação:</label>
+                  <label>Motivação:</label>
                   <span>{pessoa.motivacao}</span>
                 </div>
               </CardBody>
@@ -279,6 +297,15 @@ const AdminDashboard = () => {
             `Nenhum ${filter === 'todos' ? 'cadastro' : filter.toLowerCase()} encontrado.`
           }
         </div>
+      )}
+
+      {/* Modal de Edição */}
+      {showEditModal && editingUser && (
+        <EditModal
+          user={editingUser}
+          onClose={handleCloseModal}
+          onUpdate={handleUpdateUser}
+        />
       )}
     </AdminContainer>
   );
