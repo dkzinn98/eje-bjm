@@ -1,8 +1,4 @@
-# Implementação de Edição de Usuários - Backend
 
-## 1. Adicione estes métodos no `UserController.java`:
-
-```java
 // Buscar usuário por ID
 @GetMapping("/{id}")
 public ResponseEntity<?> getUserById(@PathVariable Long id) {
@@ -17,7 +13,8 @@ public ResponseEntity<?> getUserById(@PathVariable Long id) {
 @PutMapping("/{id}")
 public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
     try {
-        User updatedUser = userService.updateUser(id, userDTO);
+        User updatedUser =
+         userService.updateUser(id, userDTO);
         return ResponseEntity.ok(updatedUser);
     } catch (RuntimeException e) {
         return ResponseEntity.badRequest().body(e.getMessage());
@@ -34,11 +31,7 @@ public ResponseEntity<?> partialUpdateUser(@PathVariable Long id, @RequestBody M
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 }
-```
 
-## 2. Adicione estes métodos no `UserService.java`:
-
-```java
 // Buscar por ID
 public Optional<User> findById(Long id) {
     return userRepository.findById(id);
@@ -113,11 +106,7 @@ public User partialUpdateUser(Long id, Map<String, Object> updates) {
     user.setUpdatedAt(LocalDateTime.now());
     return userRepository.save(user);
 }
-```
 
-## 3. Adicione no `User.java` (se ainda não tiver):
-
-```java
 @Column(name = "updated_at")
 private LocalDateTime updatedAt;
 
@@ -128,39 +117,4 @@ public LocalDateTime getUpdatedAt() {
 
 public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
-}
-```
-
-## 4. Teste os endpoints:
-
-### Buscar usuário por ID:
-```bash
-GET http://localhost:8080/api/users/1
-```
-
-### Atualizar usuário completo:
-```bash
-PUT http://localhost:8080/api/users/1
-Content-Type: application/json
-
-{
-    "nome": "João Silva Editado",
-    "email": "joao.editado@email.com",
-    "whatsapp": "(61) 98765-4321",
-    "instagram": "@joaoeditado",
-    "idade": 20,
-    "dataNascimento": "2004-01-15",
-    "motivacao": "Motivação atualizada...",
-    "tipo": "COLABORADOR"
-}
-```
-
-### Atualização parcial:
-```bash
-PATCH http://localhost:8080/api/users/1
-Content-Type: application/json
-
-{
-    "nome": "Apenas o nome mudou",
-    "instagram": "@novoinsta"
 }
