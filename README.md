@@ -119,17 +119,6 @@ O projeto usa H2 por padrão. Acesse o console em:
 http://localhost:8080/h2-console
 ```
 
-### Produção (PostgreSQL)
-Configure as variáveis de ambiente:
-
-```properties
-# application-prod.properties
-spring.datasource.url=${DATABASE_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
-spring.jpa.hibernate.ddl-auto=update
-```
-
 ## 📱 Endpoints da API
 
 ### Usuários
