@@ -79,7 +79,7 @@ eje-project/
 ### 1️⃣ Clone o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/eje-2025.git
+git clone https://github.com/dkzinn98/eje-bjm.git
 cd eje-2025
 ```
 
@@ -145,20 +145,6 @@ spring.jpa.hibernate.ddl-auto=update
 - `POST /api/auth/login` - Login admin
 - `POST /api/auth/validate` - Validar token
 
-## 🎨 Screenshots
-
-### Página Inicial
-<img src="docs/images/home.png" alt="Página Inicial" width="600"/>
-
-### Formulário de Inscrição
-<img src="docs/images/form.png" alt="Formulário" width="600"/>
-
-### Dashboard Administrativo
-<img src="docs/images/admin.png" alt="Admin Dashboard" width="600"/>
-
-### Modal de Edição
-<img src="docs/images/edit-modal.png" alt="Modal de Edição" width="600"/>
-
 ## 🔐 Credenciais de Acesso
 
 ### Painel Administrativo
@@ -206,15 +192,14 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 👥 Equipe
 
-- **Desenvolvimento**: [Seu Nome]
-- **Design**: [Nome do Designer]
-- **Coordenação**: Equipe EJE 2025
+- **Desenvolvimento**: [Deryk Silva]
+- **Coordenação**: Dirigentes EJE 2025
 
 ## 📞 Contato
 
-- **Email**: contato@eje2025.com.br
-- **Instagram**: [@eje2025](https://instagram.com/eje2025)
-- **WhatsApp**: (61) 9999-9999
+- **Email**: derykalcinodasilva@icloud.com  
+- **Instagram**: [@dkode.js](https://instagram.com/dkode.js)
+- **WhatsApp**: (61) 98166-3662
 
 ---
 
