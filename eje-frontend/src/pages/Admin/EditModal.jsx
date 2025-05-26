@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { userService } from '../../services/api';
@@ -71,7 +71,6 @@ const Title = styled.h2`
   background: linear-gradient(45deg, #ff7b00, #ffaa00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text; /* Add standard property for compatibility */
 `;
 
 const Form = styled.form`
@@ -164,6 +163,63 @@ const Select = styled.select`
   }
 `;
 
+const FileInputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+`;
+
+const FileInput = styled.input`
+  display: none;
+`;
+
+const FileInputLabel = styled.label`
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 2px dashed rgba(177, 88, 28, 0.5);
+  background: rgba(30, 41, 59, 0.7);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    border-color: #ff7b00;
+    background: rgba(30, 41, 59, 0.9);
+    color: white;
+  }
+`;
+
+const PhotoPreview = styled.div`
+  width: 150px;
+  height: 150px;
+  margin: 1rem auto;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid rgba(177, 88, 28, 0.5);
+  background: rgba(30, 41, 59, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .placeholder {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+`;
+
 const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
@@ -245,6 +301,8 @@ export const EditModal = ({ user, onClose, onUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [newPhoto, setNewPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   // Carregar dados do usuário
   useEffect(() => {
@@ -306,6 +364,33 @@ export const EditModal = ({ user, onClose, onUpdate }) => {
     }));
   };
 
+  // Manipular upload de foto
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor, selecione apenas arquivos de imagem');
+        return;
+      }
+      
+      // Validar tamanho (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('A imagem deve ter no máximo 5MB');
+        return;
+      }
+      
+      setNewPhoto(file);
+      
+      // Criar preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Submeter formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -319,9 +404,18 @@ export const EditModal = ({ user, onClose, onUpdate }) => {
         throw new Error('Preencha todos os campos obrigatórios');
       }
 
-      // Chamar API para atualizar
+      // Chamar API para atualizar dados
       // eslint-disable-next-line react/prop-types
       const updatedUser = await userService.update(user.id, formData);
+      
+      // Se houver nova foto, fazer upload
+      if (newPhoto) {
+        // eslint-disable-next-line react/prop-types
+        await userService.uploadPhoto(user.id, newPhoto);
+        // Atualizar a URL da foto no usuário
+        // eslint-disable-next-line react/prop-types
+        updatedUser.fotoUrl = `photo_${user.id}_${Date.now()}`;
+      }
       
       setSuccess(true);
       
@@ -456,6 +550,45 @@ export const EditModal = ({ user, onClose, onUpdate }) => {
               disabled={loading}
             />
           </InputGroup>
+          
+          <FileInputGroup>
+            <Label>Foto de Perfil</Label>
+            <PhotoPreview>
+              {/* eslint-disable-next-line react/prop-types */}
+              {photoPreview || user.fotoUrl ? (
+                <img 
+                  // eslint-disable-next-line react/prop-types
+                  src={photoPreview || `http://localhost:8080/api/users/${user.id}/photo`}
+                  alt="Preview"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              {/* eslint-disable-next-line react/prop-types */}
+              <div className="placeholder" style={{ display: photoPreview || user.fotoUrl ? 'none' : 'block' }}>
+                📷
+              </div>
+            </PhotoPreview>
+            
+            <FileInputLabel htmlFor="photo-upload">
+              📸 {newPhoto ? 'Trocar Foto' : 'Adicionar Nova Foto'}
+            </FileInputLabel>
+            <FileInput
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              disabled={loading}
+            />
+            
+            {newPhoto && (
+              <small style={{ color: 'rgba(255, 255, 255, 0.7)', textAlign: 'center' }}>
+                Nova foto selecionada: {newPhoto.name}
+              </small>
+            )}
+          </FileInputGroup>
           
           <ButtonGroup>
             <CancelButton type="button" onClick={onClose} disabled={loading}>
