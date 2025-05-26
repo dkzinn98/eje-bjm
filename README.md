@@ -79,7 +79,7 @@ eje-project/
 ### 1️⃣ Clone o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/eje-2025.git
+git clone https://github.com/dkzinn98/eje-bjm.git
 cd eje-2025
 ```
 
