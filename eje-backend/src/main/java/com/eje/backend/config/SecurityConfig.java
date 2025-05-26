@@ -26,47 +26,97 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // Configuração CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            
+            // Desabilitar CSRF para APIs REST
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            // Política de sessão stateless para APIs
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            
+            // Configuração de autorização
             .authorizeHttpRequests(authz -> authz
-                // Endpoints públicos
+                // Endpoints públicos - usuários
                 .requestMatchers("/api/users").permitAll()              // POST para cadastro
                 .requestMatchers("/api/users/**").permitAll()           // Todos endpoints de usuários (temporário)
+                .requestMatchers("/api/users/*/photo").permitAll()      // Upload/download de fotos
+                
+                // Endpoints públicos - outros
                 .requestMatchers("/api/photos/**").permitAll()          // Servir fotos
                 .requestMatchers("/api/auth/login").permitAll()         // Login
-                .requestMatchers("/h2-console/**").permitAll()          // Console H2
-                .requestMatchers("/error").permitAll()                 // Páginas de erro
+                .requestMatchers("/api/auth/register").permitAll()      // Registro
+                
+                // Console H2 (apenas para desenvolvimento)
+                .requestMatchers("/h2-console/**").permitAll()
+                
+                // Páginas de erro
+                .requestMatchers("/error").permitAll()
+                
+                // Swagger/OpenAPI (se estiver usando)
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                
+                // Health check
+                .requestMatchers("/actuator/health").permitAll()
                 
                 // Todos os outros endpoints precisam de autenticação
                 .anyRequest().authenticated()
             )
-            .headers(headers -> headers.frameOptions().disable()); // Para H2 Console
+            
+            // Configuração de headers - versão simplificada e compatível
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.disable())   // Para H2 Console
+            );
         
         return http.build();
     }
     
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    
-    // Permitir origem específica
-    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-    
-    // Permitir todos os métodos HTTP
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
-    
-    // Permitir todos os headers
-    configuration.setAllowedHeaders(Arrays.asList("*"));
-    
-    // Permitir credenciais
-    configuration.setAllowCredentials(true);
-    
-    // Expor headers de resposta
-    configuration.setExposedHeaders(Arrays.asList("*"));
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-}
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Permitir origens específicas (adicionar mais conforme necessário)
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173",    // Vite dev server
+            "http://localhost:3000",    // React dev server
+            "http://localhost:8080"     // Outras possíveis origens
+        ));
+        
+        // Permitir métodos HTTP específicos
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
+        ));
+        
+        // Permitir headers específicos (mais seguro que "*")
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ));
+        
+        // Permitir credenciais
+        configuration.setAllowCredentials(true);
+        
+        // Expor headers específicos de resposta
+        configuration.setExposedHeaders(Arrays.asList(
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials",
+            "Authorization",
+            "Content-Disposition"
+        ));
+        
+        // Tempo de cache para preflight requests
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

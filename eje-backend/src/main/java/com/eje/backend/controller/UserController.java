@@ -1,120 +1,176 @@
+package com.eje.backend.controller;
 
-// Buscar usuário por ID
-@GetMapping("/{id}")
-public ResponseEntity<?> getUserById(@PathVariable Long id) {
-    Optional<User> user = userService.findById(id);
-    if (user.isPresent()) {
-        return ResponseEntity.ok(user.get());
+import com.eje.backend.dto.UserDTO;
+import com.eje.backend.model.User;
+import com.eje.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    // Listar todos os usuários
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
-    return ResponseEntity.notFound().build();
-}
 
-// Atualizar usuário
-@PutMapping("/{id}")
-public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
-    try {
-        User updatedUser =
-         userService.updateUser(id, userDTO);
-        return ResponseEntity.ok(updatedUser);
-    } catch (RuntimeException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-}
-
-// Atualização parcial
-@PatchMapping("/{id}")
-public ResponseEntity<?> partialUpdateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-    try {
-        User updatedUser = userService.partialUpdateUser(id, updates);
-        return ResponseEntity.ok(updatedUser);
-    } catch (RuntimeException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-}
-
-// Buscar por ID
-public Optional<User> findById(Long id) {
-    return userRepository.findById(id);
-}
-
-// Atualizar usuário completo
-@Transactional
-public User updateUser(Long id, UserDTO userDTO) {
-    User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-    
-    // Verificar se o email mudou e já existe
-    if (!user.getEmail().equals(userDTO.getEmail())) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("Email já cadastrado");
+    // Criar novo usuário
+    @PostMapping
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO) {
+        try {
+            User newUser = userService.createUser(userDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
-    
-    // Atualizar campos
-    user.setNome(userDTO.getNome());
-    user.setEmail(userDTO.getEmail());
-    user.setWhatsapp(userDTO.getWhatsapp());
-    user.setInstagram(userDTO.getInstagram());
-    user.setIdade(userDTO.getIdade());
-    user.setDataNascimento(userDTO.getDataNascimento());
-    user.setMotivacao(userDTO.getMotivacao());
-    user.setTipo(userDTO.getTipo());
-    user.setUpdatedAt(LocalDateTime.now());
-    
-    return userRepository.save(user);
-}
 
-// Atualização parcial
-@Transactional
-public User partialUpdateUser(Long id, Map<String, Object> updates) {
-    User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-    
-    updates.forEach((key, value) -> {
-        switch (key) {
-            case "nome":
-                user.setNome((String) value);
-                break;
-            case "email":
-                String newEmail = (String) value;
-                if (!user.getEmail().equals(newEmail)) {
-                    if (userRepository.existsByEmail(newEmail)) {
-                        throw new RuntimeException("Email já cadastrado");
-                    }
-                    user.setEmail(newEmail);
-                }
-                break;
-            case "whatsapp":
-                user.setWhatsapp((String) value);
-                break;
-            case "instagram":
-                user.setInstagram((String) value);
-                break;
-            case "idade":
-                user.setIdade(Integer.valueOf(value.toString()));
-                break;
-            case "motivacao":
-                user.setMotivacao((String) value);
-                break;
-            case "tipo":
-                user.setTipo(UserType.valueOf((String) value));
-                break;
-            // Adicione outros campos conforme necessário
+    // Buscar usuário por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.findById(id);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
         }
-    });
-    
-    user.setUpdatedAt(LocalDateTime.now());
-    return userRepository.save(user);
-}
+        return ResponseEntity.notFound().build();
+    }
 
-@Column(name = "updated_at")
-private LocalDateTime updatedAt;
+    // Atualizar usuário
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
+        try {
+            User updatedUser = userService.updateUser(id, userDTO);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
 
-// Adicione getter e setter
-public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-}
+    // Atualização parcial
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> partialUpdateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        try {
+            User updatedUser = userService.partialUpdateUser(id, updates);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
 
-public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
+    // Deletar usuário
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Usuário deletado com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // Upload de foto
+    @PostMapping("/{id}/photo")
+    public ResponseEntity<?> uploadPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Arquivo vazio");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            String photoUrl = userService.saveUserPhoto(id, file);
+            Map<String, String> response = new HashMap<>();
+            response.put("photoUrl", photoUrl);
+            response.put("message", "Foto enviada com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Erro ao salvar foto: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // Buscar foto
+    @GetMapping("/{id}/photo")
+    public ResponseEntity<?> getUserPhoto(@PathVariable Long id) {
+        try {
+            Resource resource = userService.getUserPhoto(id);
+            if (resource == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // Buscar por tipo (COLABORADOR ou EJISTA)
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<List<User>> getUsersByTipo(@PathVariable String tipo) {
+        try {
+            List<User> users = userService.findByTipo(tipo);
+            return ResponseEntity.ok(users);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // Buscar por email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        Optional<User> user = userService.findByEmail(email);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Contar total de usuários
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> countUsers() {
+        Map<String, Long> count = new HashMap<>();
+        count.put("total", userService.countAll());
+        count.put("colaboradores", userService.countByTipo("COLABORADOR"));
+        count.put("ejistas", userService.countByTipo("EJISTA"));
+        return ResponseEntity.ok(count);
+    }
 }

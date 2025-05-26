@@ -4,6 +4,7 @@ import {
   AdminContainer, 
   AdminHeader, 
   LogoutButton,
+  RefreshButton,
   StatsContainer,
   StatCard,
   FiltersContainer,
@@ -28,9 +29,11 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [pessoas, setPessoas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(null);
 
   // Carregar dados quando autenticar
   useEffect(() => {
@@ -45,6 +48,7 @@ const AdminDashboard = () => {
     try {
       const data = await userService.getAll();
       setPessoas(data);
+      setLastUpdate(new Date());
     } catch (error) {
       setError(handleApiError(error));
       console.error('Erro ao carregar usuários:', error);
@@ -53,9 +57,34 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setError('');
+    try {
+      const data = await userService.getAll();
+      setPessoas(data);
+      setLastUpdate(new Date());
+      
+      // Feedback visual de sucesso
+      const refreshBtn = document.querySelector('[data-refresh-button]');
+      if (refreshBtn) {
+        refreshBtn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          refreshBtn.style.transform = 'scale(1)';
+        }, 150);
+      }
+    } catch (error) {
+      setError(handleApiError(error));
+      console.error('Erro ao atualizar dados:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleLogout = () => {
     setIsAuthenticated(false);
     setPessoas([]);
+    setLastUpdate(null);
   };
 
   const handleEdit = (pessoa) => {
@@ -84,6 +113,7 @@ const AdminDashboard = () => {
         await userService.delete(pessoaId);
         // Remover da lista local
         setPessoas(prev => prev.filter(p => p.id !== pessoaId));
+        setLastUpdate(new Date());
         alert('Usuário excluído com sucesso!');
       } catch (error) {
         // biome-ignore lint/style/useTemplate: <explanation>
@@ -111,6 +141,26 @@ const AdminDashboard = () => {
     return nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
+  const formatLastUpdate = (date) => {
+    if (!date) return '';
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'Atualizado agora';
+    // biome-ignore lint/style/noUselessElse: <explanation>
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `Atualizado há ${minutes} min`;
+    // biome-ignore lint/style/noUselessElse: <explanation>
+    } else {
+      return `Atualizado às ${date.toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })}`;
+    }
+  };
+
   // Se não autenticado, mostra tela de login
   if (!isAuthenticated) {
     return <AdminLogin onLogin={setIsAuthenticated} />;
@@ -120,10 +170,54 @@ const AdminDashboard = () => {
     <AdminContainer>
       <AdminHeader>
         <h1>Painel Administrativo EJE 2025</h1>
-        <LogoutButton onClick={handleLogout}>
-          Sair
-        </LogoutButton>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <RefreshButton 
+            onClick={handleRefresh}
+            disabled={refreshing || loading}
+            data-refresh-button
+            title={lastUpdate ? formatLastUpdate(lastUpdate) : 'Atualizar dados'}
+          >
+            {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+<svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              style={{ 
+                animation: refreshing ? 'spin 1s linear infinite' : 'none',
+                transition: 'transform 0.2s ease'
+              }}
+            >
+              {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
+<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+              {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
+<path d="M21 3v5h-5"></path>
+              {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
+<path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+              {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
+<path d="M3 21v-5h5"></path>
+            </svg>
+            {refreshing ? 'Atualizando...' : 'Atualizar'}
+          </RefreshButton>
+          <LogoutButton onClick={handleLogout}>
+            Sair
+          </LogoutButton>
+        </div>
       </AdminHeader>
+
+      {/* Mostrar horário da última atualização */}
+      {lastUpdate && (
+        <div style={{
+          textAlign: 'center',
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontSize: '0.9rem',
+          marginBottom: '10px'
+        }}>
+          {formatLastUpdate(lastUpdate)}
+        </div>
+      )}
 
       {/* Mostrar erro se houver */}
       {error && (

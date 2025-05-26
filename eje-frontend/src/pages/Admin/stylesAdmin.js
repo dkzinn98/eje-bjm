@@ -326,33 +326,37 @@ export const Avatar = styled.div`
 `;
 
 export const PersonInfo = styled.div`
-  flex: 1;
-
   h3 {
     color: white;
-    font-size: clamp(1rem, 3vw, 1.2rem);
-    font-weight: 600;
     margin: 0 0 8px 0;
-    line-height: 1.2;
+    font-size: 1.2rem;
+    font-weight: 600;
   }
 
   .tipo {
-    background: ${props => props.tipo === 'Colaborador' ? 
-      'linear-gradient(45deg, #059669, #10b981)' : 
-      'linear-gradient(45deg, #7c3aed, #a855f7)'};
+    background: ${props => {
+      if (props.tipo === 'EJISTA') return 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'; // Verde vibrante
+      if (props.tipo === 'COLABORADOR') return 'linear-gradient(135deg, #dc3545 0%, #e74c3c 100%)'; // Vermelho vibrante
+      return 'linear-gradient(135deg, #6c757d 0%, #5a6268 100%)'; // Cinza padrão
+    }};
     color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
     display: inline-block;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
   }
 
-  @media (max-width: 768px) {
-    .tipo {
-      font-size: 0.75rem;
-      padding: 3px 10px;
-    }
+  /* Efeito hover na badge do tipo */
+  .tipo:hover {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 `;
 
@@ -551,5 +555,94 @@ export const LoginButton = styled.button`
   @media (max-width: 480px) {
     padding: 12px;
     font-size: 14px;
+  }
+`;
+
+// Adicione este styled component junto com os outros no stylesAdmin.js
+
+export const RefreshButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #357abd 0%, #2968a3 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  svg {
+    transition: transform 0.3s ease;
+  }
+
+  /* Animação de rotação para o ícone quando estiver atualizando */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Efeito de ondulação quando clicado */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:active:not(:disabled)::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Responsividade */
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 13px;
+    gap: 6px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    span {
+      display: none; /* Esconder texto em telas muito pequenas */
+    }
+    padding: 10px 12px;
   }
 `;
