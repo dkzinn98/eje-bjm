@@ -21,6 +21,7 @@ Sistema completo de gestão de inscrições para o Encontro de Jovens das Escola
 - **🔍 Busca e Filtros**: Pesquisa por nome, email e tipo de usuário
 - **📊 Estatísticas**: Visualização de métricas em tempo real
 - **🗑️ Exclusão Segura**: Confirmação antes de deletar registros
+- **🔁 Refresh **: Atualiza sem precisar dar F5 na página
 
 ## 🚀 Tecnologias Utilizadas
 
