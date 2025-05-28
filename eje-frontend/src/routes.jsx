@@ -2,7 +2,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Colaborador from "./pages/Colaborador/indexColaborador.jsx";
 import Ejista from "./pages/Ejista/indexEjistas.jsx";
 import Home from "./pages/Home/indexHome.jsx";
-import AdminDashboard from './pages/Admin/AdminDashboard';
+import AdminDashboard from './pages/Admin/adminDashboard';
 import { GlobalStyle } from "./styles/GlobalStyles.js";
 
 const App = () => {
