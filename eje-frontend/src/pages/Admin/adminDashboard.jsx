@@ -19,7 +19,7 @@ import {
   CardActions,
   ActionButton 
 } from './stylesAdmin';
-import AdminLogin from './AdminLogin';
+import AdminLogin from './adminLogin';
 import { EditModal } from './EditModal';
 import { userService, handleApiError } from '../../services/api';
 
