@@ -15,8 +15,13 @@ public class ValidateToken implements UseCase<ValidateToken.Input, Boolean> {
 
     @Override
     public Boolean execute(Input input) {
-        validateToken(input.token());
-        return true;
+        try {
+            validateToken(input.token());
+            return true;
+        } catch (Exception e) {
+            log.error("Error validating token", e);
+            throw e;
+        }
     }
 
     private void validateToken(String token) {
