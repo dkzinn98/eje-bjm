@@ -1,113 +1,60 @@
 package com.eje.backend.controller;
 
-import com.eje.backend.service.AdminService;
-import com.eje.backend.service.JwtService;
+import com.eje.backend.usecase.LoginUser;
+import com.eje.backend.usecase.ValidateToken;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000")
-public class AuthController {
-    
-    @Autowired
-    private AdminService adminService;
-    
-    @Autowired
-    private JwtService jwtService;
-    
+public record AuthController(
+        LoginUser loginUser,
+        ValidateToken validateToken
+) {
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            if (adminService.validateLogin(loginRequest.getUsername(), loginRequest.getPassword())) {
-                String token = jwtService.generateToken(loginRequest.getUsername());
-                return ResponseEntity.ok(new LoginResponse(token, "Login realizado com sucesso"));
-            } else {
-                return ResponseEntity.badRequest().body(new ErrorResponse("Usuário ou senha incorretos"));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro interno do servidor"));
-        }
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        var input = new LoginUser.Input(loginRequest.username(), loginRequest.password());
+        var token = loginUser.execute(input);
+        var response = new LoginResponse(token, "Login realizado com sucesso");
+        return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping("/validate")
-    public ResponseEntity<?> validateToken(@RequestBody TokenRequest tokenRequest) {
-        try {
-            String username = jwtService.extractUsername(tokenRequest.getToken());
-            if (jwtService.validateToken(tokenRequest.getToken(), username)) {
-                return ResponseEntity.ok(new SuccessResponse("Token válido"));
-            } else {
-                return ResponseEntity.badRequest().body(new ErrorResponse("Token inválido"));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Token inválido"));
-        }
+    public ResponseEntity<ValidateTokenResponse> validateToken(@RequestBody TokenRequest tokenRequest) {
+        var input = new ValidateToken.Input(tokenRequest.token);
+        var response = validateToken.execute(input);
+        return response
+                ? ResponseEntity.ok(new ValidateTokenResponse("Token válido"))
+                : ResponseEntity.badRequest().body(new ValidateTokenResponse("Token inválido"));
     }
-    
-    // Classes de request/response
-    public static class LoginRequest {
-        @NotBlank(message = "Username é obrigatório")
-        private String username;
-        
-        @NotBlank(message = "Password é obrigatório")
-        private String password;
-        
-        // Getters e Setters
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+
+    public record LoginRequest(
+            @NotBlank(message = "Username é obrigatório")
+            String username,
+            @NotBlank(message = "Password é obrigatório")
+            String password
+    ) {
     }
-    
-    public static class TokenRequest {
-        @NotBlank(message = "Token é obrigatório")
-        private String token;
-        
-        // Getters e Setters
-        public String getToken() { return token; }
-        public void setToken(String token) { this.token = token; }
+
+    public record TokenRequest(
+            @NotBlank(message = "Token é obrigatório")
+            String token
+    ) {
     }
-    
-    public static class LoginResponse {
-        private String token;
-        private String message;
-        
-        public LoginResponse(String token, String message) {
-            this.token = token;
-            this.message = message;
-        }
-        
-        // Getters e Setters
-        public String getToken() { return token; }
-        public void setToken(String token) { this.token = token; }
-        
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
+
+    public record LoginResponse(
+            String token,
+            String message
+    ) {
     }
-    
-    public static class ErrorResponse {
-        private String message;
-        
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-        
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
-    }
-    
-    public static class SuccessResponse {
-        private String message;
-        
-        public SuccessResponse(String message) {
-            this.message = message;
-        }
-        
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
+
+    public record ValidateTokenResponse(String message) {
     }
 }
