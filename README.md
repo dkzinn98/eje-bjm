@@ -37,7 +37,7 @@ Sistema completo de gestão de inscrições para o Encontro de Jovens das Escola
 - **Spring Data JPA** - Persistência de dados
 - **Spring Security** - Autenticação e autorização
 - **H2 Database** - Banco de dados em desenvolvimento
-- **PostgreSQL** - Banco de dados em produção
+- **Docker PostgreSQL** - Banco de dados em produção
 - **Maven** - Gerenciador de dependências
 
 ## 📁 Estrutura do Projeto
